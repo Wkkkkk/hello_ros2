@@ -1,0 +1,91 @@
+// Copyright 2017 The Cartographer Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package zhihui.test.proto;
+
+import "google/protobuf/empty.proto";
+
+message Vector3d {
+    double x = 1;
+    double y = 2;
+    double z = 3;
+}
+
+message Position {
+    Vector3d pos = 1;
+}
+
+message PointCloudData {
+    repeated Vector3d point_data = 1;
+}
+
+message Metadata {
+    int64 timestamp = 1;
+    string client_id = 2;
+    string sensor_id = 3;
+}
+
+message LoginRequest {
+    Metadata metadata = 1;
+    int64 order = 2;
+    string log_information = 3;
+}
+
+message LoginResponse {
+    int64 timestamp = 1;
+    string check_information = 2;
+}
+
+message UpdatePositionRequest {
+    Metadata metadata = 1;
+    Position position = 2;
+}
+
+message UploadPointCloudRequest {
+    Metadata metadata = 1;
+    PointCloudData pointcloud_data = 2;
+}
+
+message UpdateResponse {
+    int64 timestamp = 1;
+    int32 count = 2;
+}
+
+message InstructionResponse {
+    int64 timestamp = 1;
+    Position goal = 2;
+}
+
+message testMessage {
+    int64 timestamp = 1;
+    int32 index = 2;
+}
+
+// information about the gRPC server.
+service Localization {
+    // clients register at the server
+    rpc Login (LoginRequest) returns (LoginResponse);
+
+    // clients wait for instructions from the server
+    rpc GetInstructions (LoginRequest) returns (stream InstructionResponse);
+
+    // clients update/upload self-information to the server
+    rpc UpdatePosition (stream UpdatePositionRequest) returns (google.protobuf.Empty);
+    rpc UploadPointCloud (stream UploadPointCloudRequest) returns (google.protobuf.Empty);
+
+    // a test in which the client and the server exchange and increment the index
+    rpc BidirectionalTest (stream testMessage) returns (stream testMessage);
+}

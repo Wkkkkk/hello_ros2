@@ -41,11 +41,27 @@ add_executable(compose_test src/test.cpp)
 ament_target_dependencies(compose_test rclcpp rclcpp_action)
 target_link_libraries(compose_test ${PROJECT_NAME})
 
-install(TARGETS
-        ${PROJECT_NAME}
-        ARCHIVE DESTINATION lib
+# declare ament_export here
+# otherwise other packages can't find include/*.h files
+ament_export_dependencies(tutorials_msgs)
+ament_export_interfaces(export_${PROJECT_NAME})
+ament_export_include_directories(include)
+ament_export_libraries(${PROJECT_NAME})
+
+# export include directory
+install(
+        DIRECTORY include/
+        DESTINATION include
+)
+
+# export lib
+install(TARGETS ${PROJECT_NAME}
+        EXPORT export_${PROJECT_NAME}
         LIBRARY DESTINATION lib
-        RUNTIME DESTINATION bin)
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin
+        INCLUDES DESTINATION include
+        )
 
 install(TARGETS
         node
