@@ -17,7 +17,13 @@ ActionClient::ActionClient(std::string name, const rclcpp::NodeOptions &node_opt
             this->get_node_waitables_interface(),
             "fibonacci");
 
-    this->timer_ = this->create_wall_timer(0.5s,std::bind(&ActionClient::send_goal, this));
+    // default value
+    goal_.order = 0;
+
+    // heartbeat test
+    timer_ = this->create_wall_timer(1s, [this]() {
+        RCLCPP_INFO(this->get_logger(), "node %s is alive", this->get_name());
+    });
 }
 
 bool ActionClient::is_goal_done() const {
@@ -25,23 +31,22 @@ bool ActionClient::is_goal_done() const {
 }
 
 void ActionClient::cancel_goal() {
-    this->timer2_->cancel();
-
     // in case server not available
-    if(goal_handle_future_.valid()) {
+    if (goal_handle_future_.valid()) {
         auto cancel_result_future = this->client_ptr_->async_cancel_goal(goal_handle_future_.get());
     }
+}
 
-    this->timer_ = this->create_wall_timer(1s,std::bind(&ActionClient::send_goal, this));
+void ActionClient::set_goal(ActionMessage::Goal goal) {
+    goal_ = goal;
+}
+
+void ActionClient::set_processor(ActionClient::FeedbackProcessor processor) {
+    feedback_processor_ = processor;
 }
 
 void ActionClient::send_goal() {
     using namespace std::placeholders;
-
-    this->timer_->cancel();
-
-    // cancel after a while
-    this->timer2_ = this->create_wall_timer(5s, std::bind(&ActionClient::cancel_goal, this));
 
     this->goal_done_ = false;
 
@@ -55,8 +60,7 @@ void ActionClient::send_goal() {
         return;
     }
 
-    auto goal_msg = ActionMessage::Goal();
-    goal_msg.order = 100;
+    auto goal_msg = goal_;
 
     RCLCPP_INFO(this->get_logger(), "------------------------------------------------");
     RCLCPP_INFO(this->get_logger(), "Sending goal");
@@ -86,8 +90,14 @@ void ActionClient::feedback_callback(ActionGoalHandle::SharedPtr,
     RCLCPP_INFO(
             this->get_logger(),
             "Next number in sequence received: %"
-                    PRId64,
+    PRId64,
             feedback->partial_sequence.back());
+
+    if (feedback_processor_) {
+        feedback_processor_(feedback);
+    } else {
+        std::cout << "no feedback processor" << std::endl;
+    }
 }
 
 void
