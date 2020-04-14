@@ -24,6 +24,9 @@ namespace Schedule {
 
         void wait_for_shutdown();
 
+        rclcpp::executors::MultiThreadedExecutor &get_executor();
+
+    private:
         void init_ros_thread();
 
         std::unique_ptr <std::thread> ros_thread_;

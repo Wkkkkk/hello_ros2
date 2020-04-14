@@ -1,12 +1,17 @@
-# A ROS2 Framework Test
+# A grpc-ROS2 Framework Test
 
 ## Objective
-<a name="objective"></a>
 
-This repository aims to test ROS2 framework for building topic-based communication between nodes.
-The framework is easy to use and supports several different means of message transmission.
+This repository aims to integrate grpc and ROS2 framework which supports action/service/topic-based communication between nodes.
+The framework should be easy to use and supports several different means of message transmission.
 
 It receives both common and user-defined data types, which are handled by independent nodes of the system.
 
-## Node graph
-![avatar](./dep.png)
+## Node dependency graph
+![avatar](./docs/dep.png)
+
+## Architecture
+![avatar](./docs/architecture.png)
+
+## gRPC
+![avatar](./docs/grpc.png)

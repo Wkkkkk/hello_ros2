@@ -41,6 +41,8 @@ ScheduleServer::~ScheduleServer() {
 void ScheduleServer::start() {
     LOG(INFO) << "Server listening on " << kTestingServerAddress;
     grpc_server_->Start();
+
+    init_ros_thread();
 }
 
 void ScheduleServer::shutdown() {
@@ -59,7 +61,7 @@ void ScheduleServer::init_ros_thread() {
 
     ros_thread_ = std::make_unique<std::thread>(
             [this]() {
-                rclcpp::Rate loop_rate(1);
+                rclcpp::Rate loop_rate(100ms);
 
                 // Do work periodically as it becomes available to us.
                 // Blocking call, may block indefinitely.
@@ -72,4 +74,8 @@ void ScheduleServer::init_ros_thread() {
                 // shutdown server
                 this->shutdown();
             });
+}
+
+rclcpp::executors::MultiThreadedExecutor &ScheduleServer::get_executor() {
+    return exec_;
 }

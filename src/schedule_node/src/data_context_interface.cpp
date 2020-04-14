@@ -11,7 +11,9 @@ DataContextInterface::DataContextInterface(ScheduleServer *map_builder_server)
         : map_builder_server_(map_builder_server) {}
 
 void DataContextInterface::add_node(std::shared_ptr <rclcpp::Node> node_ptr) {
-    map_builder_server_->exec_.add_node(node_ptr);
+    map_builder_server_->get_executor().add_node(node_ptr);
+
+    //TODO: add detection for unused node
 }
 
 void DataContextInterface::remove_action_node_by_name(const std::string &node_name) {

@@ -7,9 +7,13 @@
 #include "action_node/action_client.h"
 
 using namespace std::chrono_literals;
+using namespace Action;
 
-ActionClient::ActionClient(std::string name, const rclcpp::NodeOptions &node_options)
-        : Node(name, node_options), goal_done_(false) {
+// the time out timer use to make async_cancel_goal() and avoid deadlock scenario
+auto C_DELAY_TIME = 10ms;
+
+ActionClient::ActionClient(const std::string &name, const rclcpp::NodeOptions &node_options)
+        : Node(name, node_options), goal_done_(true) {
     this->client_ptr_ = rclcpp_action::create_client<ActionMessage>(
             this->get_node_base_interface(),
             this->get_node_graph_interface(),
@@ -21,7 +25,7 @@ ActionClient::ActionClient(std::string name, const rclcpp::NodeOptions &node_opt
     goal_.order = 0;
 
     // heartbeat test
-    timer_ = this->create_wall_timer(1s, [this]() {
+    heartbeat_timer_ = this->create_wall_timer(1s, [this]() {
         RCLCPP_INFO(this->get_logger(), "node %s is alive", this->get_name());
     });
 }
@@ -31,9 +35,19 @@ bool ActionClient::is_goal_done() const {
 }
 
 void ActionClient::cancel_goal() {
-    // in case server not available
+    RCLCPP_INFO(this->get_logger(), "cancel goal");
+    // in case server not available or goal hasn't been sent
     if (goal_handle_future_.valid()) {
-        auto cancel_result_future = this->client_ptr_->async_cancel_goal(goal_handle_future_.get());
+        /// this function could be called in feedback_callback()
+        /// but async_cancel_goal() and feedback_callback() both requires goal_handles_mutex_
+        /// which could result in a dead lock
+        /// so we made async_cancel_goal() run through a timer to avoid such scenario
+        cancel_timer_ = this->create_wall_timer(C_DELAY_TIME, [this]() {
+            cancel_timer_->cancel();
+
+            auto handle = goal_handle_future_.get();
+            auto cancel_result_future = this->client_ptr_->async_cancel_goal(goal_handle_future_.get());
+        });
     }
 }
 
@@ -41,8 +55,12 @@ void ActionClient::set_goal(ActionMessage::Goal goal) {
     goal_ = goal;
 }
 
-void ActionClient::set_processor(ActionClient::FeedbackProcessor processor) {
-    feedback_processor_ = processor;
+void ActionClient::set_feedback_callback(ActionClient::FeedbackCallback callback) {
+    feedback_callback_ = callback;
+}
+
+void ActionClient::set_result_callback(ResultCallback callback) {
+    result_callback_ = callback;
 }
 
 void ActionClient::send_goal() {
@@ -72,10 +90,18 @@ void ActionClient::send_goal() {
             std::bind(&ActionClient::feedback_callback, this, _1, _2);
     send_goal_options.result_callback =
             std::bind(&ActionClient::result_callback, this, _1);
+
     auto goal_handle_future = this->client_ptr_->async_send_goal(goal_msg, send_goal_options);
+
+    /*
+     * TODO: test if it's necessary to put off async_send_goal()
+    send_timer_ = this->create_wall_timer(C_DELAY_TIME, [this]() {
+        send_timer_->cancel();
+    });
+    */
 }
 
-void ActionClient::goal_response_callback(std::shared_future<ActionGoalHandle::SharedPtr> future) {
+void ActionClient::goal_response_callback(std::shared_future <ActionClientGoalHandle::SharedPtr> future) {
     auto goal_handle = future.get();
     if (!goal_handle) {
         RCLCPP_ERROR(this->get_logger(), "Goal was rejected by server");
@@ -85,23 +111,23 @@ void ActionClient::goal_response_callback(std::shared_future<ActionGoalHandle::S
     }
 }
 
-void ActionClient::feedback_callback(ActionGoalHandle::SharedPtr,
-                                     const std::shared_ptr<const ActionMessage::Feedback> feedback) {
+void ActionClient::feedback_callback(ActionClientGoalHandle::SharedPtr,
+                                     const ActionFeedback feedback) {
     RCLCPP_INFO(
             this->get_logger(),
             "Next number in sequence received: %"
     PRId64,
             feedback->partial_sequence.back());
 
-    if (feedback_processor_) {
-        feedback_processor_(feedback);
+    if (feedback_callback_) {
+        feedback_callback_(feedback);
     } else {
-        std::cout << "no feedback processor" << std::endl;
+        RCLCPP_WARN(this->get_logger(), "There is node feedback callback, abandon current feedback");
     }
 }
 
 void
-ActionClient::result_callback(const rclcpp_action::ClientGoalHandle<ActionClient::ActionMessage>::WrappedResult &result) {
+ActionClient::result_callback(const ActionResult &result) {
     this->goal_done_ = true;
     RCLCPP_INFO(this->get_logger(), "Goal %d received result", result.goal_id);
     switch (result.code) {
@@ -118,8 +144,9 @@ ActionClient::result_callback(const rclcpp_action::ClientGoalHandle<ActionClient
             return;
     }
 
-    for (auto number : result.result->sequence) {
-        RCLCPP_INFO(this->get_logger(), "%"
-                PRId64, number);
+    if (result_callback_) {
+        result_callback_(result);
+    } else {
+        RCLCPP_WARN(this->get_logger(), "There is node result callback, abandon current result");
     }
 }
