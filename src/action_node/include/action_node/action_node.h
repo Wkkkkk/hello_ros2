@@ -12,27 +12,29 @@
 
 #include "tutorials_msgs/action/fibonacci.hpp"
 
-class ActionNode : public rclcpp::Node {
-public:
-    using Fibonacci = tutorials_msgs::action::Fibonacci;
-    using GoalHandleFibonacci = rclcpp_action::ServerGoalHandle<Fibonacci>;
+namespace Action {
 
-    explicit ActionNode(const rclcpp::NodeOptions &options = rclcpp::NodeOptions());
+    class ActionNode : public rclcpp::Node {
+    public:
+        using ActionMessage = tutorials_msgs::action::Fibonacci;
+        using ActionServerGoalHandle = rclcpp_action::ServerGoalHandle<ActionMessage>;
 
-private:
-    rclcpp_action::Server<Fibonacci>::SharedPtr action_server_;
+        explicit ActionNode(const rclcpp::NodeOptions &options = rclcpp::NodeOptions());
 
-    rclcpp_action::GoalResponse handle_goal(
-            const rclcpp_action::GoalUUID &uuid,
-            std::shared_ptr<const Fibonacci::Goal> goal);
+    private:
+        rclcpp_action::Server<ActionMessage>::SharedPtr action_server_;
 
-    rclcpp_action::CancelResponse handle_cancel(
-            const std::shared_ptr <GoalHandleFibonacci> goal_handle);
+        rclcpp_action::GoalResponse handle_goal(
+                const rclcpp_action::GoalUUID &uuid,
+                std::shared_ptr<const ActionMessage::Goal> goal);
 
-    void execute(const std::shared_ptr <GoalHandleFibonacci> goal_handle);
+        rclcpp_action::CancelResponse handle_cancel(
+                const std::shared_ptr <ActionServerGoalHandle> goal_handle);
 
-    void handle_accepted(const std::shared_ptr <GoalHandleFibonacci> goal_handle);
+        void execute(const std::shared_ptr <ActionServerGoalHandle> goal_handle);
 
-};  // class MinimalActionServer
+        void handle_accepted(const std::shared_ptr <ActionServerGoalHandle> goal_handle);
 
+    };  // class MinimalActionServer
+}  // namespace Action
 #endif //ACTION_NODE_ACTION_NODE_H

@@ -6,6 +6,8 @@
 
 #include "action_node/action_node.h"
 
+using namespace Action;
+
 int main(int argc, char **argv) {
     rclcpp::init(argc, argv);
 

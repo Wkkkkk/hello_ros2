@@ -39,21 +39,37 @@ target_link_libraries(node
         ${PROJECT_NAME}
         )
 
-add_executable(compose_test src/test.cpp)
-ament_target_dependencies(compose_test rclcpp tutorials_msgs)
-target_link_libraries(compose_test
+add_executable(node_test src/test.cpp)
+ament_target_dependencies(node_test rclcpp tutorials_msgs)
+target_link_libraries(node_test
         ${PROJECT_NAME}
         )
 
-install(TARGETS
-        ${PROJECT_NAME}
-        ARCHIVE DESTINATION lib
+# declare upstreaming libraries
+# otherwise other packages can't find include/*.h files
+ament_export_dependencies(tutorials_msgs)
+ament_export_interfaces(export_${PROJECT_NAME})
+ament_export_include_directories(include)
+ament_export_libraries(${PROJECT_NAME})
+
+# export include directory
+install(
+        DIRECTORY include/
+        DESTINATION include
+)
+
+# export lib
+install(TARGETS ${PROJECT_NAME}
+        EXPORT export_${PROJECT_NAME}
         LIBRARY DESTINATION lib
-        RUNTIME DESTINATION bin)
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin
+        INCLUDES DESTINATION include
+        )
 
 install(TARGETS
         node
-        compose_test
+        node_test
         DESTINATION lib/${PROJECT_NAME})
 
 if (BUILD_TESTING)

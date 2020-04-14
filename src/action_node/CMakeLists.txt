@@ -37,11 +37,11 @@ add_executable(node src/main.cpp)
 ament_target_dependencies(node rclcpp rclcpp_action)
 target_link_libraries(node ${PROJECT_NAME})
 
-add_executable(compose_test src/test.cpp)
-ament_target_dependencies(compose_test rclcpp rclcpp_action)
-target_link_libraries(compose_test ${PROJECT_NAME})
+add_executable(node_test src/test.cpp)
+ament_target_dependencies(node_test rclcpp rclcpp_action)
+target_link_libraries(node_test ${PROJECT_NAME})
 
-# declare ament_export here
+# declare upstreaming libraries
 # otherwise other packages can't find include/*.h files
 ament_export_dependencies(tutorials_msgs)
 ament_export_interfaces(export_${PROJECT_NAME})
@@ -65,7 +65,7 @@ install(TARGETS ${PROJECT_NAME}
 
 install(TARGETS
         node
-        compose_test
+        node_test
         DESTINATION lib/${PROJECT_NAME})
 
 if (BUILD_TESTING)

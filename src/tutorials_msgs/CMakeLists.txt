@@ -19,6 +19,7 @@ endif ()
 find_package(ament_cmake REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
+find_package(std_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 set(msg_files
@@ -26,7 +27,8 @@ set(msg_files
         )
 
 set(srv_files
-        "srv/AddTwoFloats.srv")
+        "srv/AddTwoFloats.srv"
+        "srv/SumNumbers.srv")
 
 set(action_files
         "action/Fibonacci.action")
@@ -37,7 +39,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
         ${action_files}
         )
 
-ament_export_dependencies(rosidl_default_runtime)
+# declare upstreaming libraries
+ament_export_dependencies(std_msgs rosidl_default_runtime)
 
 if (BUILD_TESTING)
     find_package(ament_lint_auto REQUIRED)

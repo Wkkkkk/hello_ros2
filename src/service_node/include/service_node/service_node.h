@@ -7,27 +7,22 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include "tutorials_msgs/srv/add_two_floats.hpp"
+#include "tutorials_msgs/srv/sum_numbers.hpp"
 
 class ServiceNode : public rclcpp::Node {
 public:
-    using AddTwoFloats = tutorials_msgs::srv::AddTwoFloats;
+    using ServiceMessage = tutorials_msgs::srv::SumNumbers;
 
     explicit ServiceNode(const rclcpp::NodeOptions &options = rclcpp::NodeOptions());
 
 private:
 
-    void add_two_floats_callback(
+    void service_callback(
             const std::shared_ptr <rmw_request_id_t> request_header,
-            const std::shared_ptr <AddTwoFloats::Request> request,
-            const std::shared_ptr <AddTwoFloats::Response> response) {
-        (void) request_header;
-        RCLCPP_INFO(rclcpp::get_logger("rclcpp"),
-                    "request: a: %ld, b: %ld", request->a, request->b);
-        response->sum = request->a + request->b;
-    }
+            const std::shared_ptr <ServiceMessage::Request> request,
+            const std::shared_ptr <ServiceMessage::Response> response);
 
-    rclcpp::Service<AddTwoFloats>::SharedPtr service_ptr_;
+    rclcpp::Service<ServiceMessage>::SharedPtr service_ptr_;
 };
 
 

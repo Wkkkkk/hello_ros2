@@ -11,20 +11,20 @@
 #include <rclcpp/rclcpp.hpp>
 #include <async_grpc/server.h>
 
-namespace server {
-    class DataServer {
+namespace Schedule {
+    class ScheduleServer {
     public:
-        DataServer();
+        ScheduleServer();
 
-        ~DataServer();
+        ~ScheduleServer();
 
-        void Start();
+        void start();
 
-        void Shutdown();
+        void shutdown();
 
-        void WaitForShutdown();
+        void wait_for_shutdown();
 
-        void initSlamThread();
+        void init_ros_thread();
 
         std::unique_ptr <std::thread> ros_thread_;
         rclcpp::executors::MultiThreadedExecutor exec_;

@@ -14,43 +14,52 @@
 #include "action_node/action_node.h"
 #include "tutorials_msgs/action/fibonacci.hpp"
 
-class ActionClient : public rclcpp::Node {
-public:
-    using ActionMessage = tutorials_msgs::action::Fibonacci;
-    using ActionGoalHandle = rclcpp_action::ClientGoalHandle<ActionMessage>;
-    using ActionFeedback = std::shared_ptr<const ActionMessage::Feedback>;
-    using FeedbackProcessor = std::function<void(ActionFeedback)>;
+namespace Action {
 
-    explicit ActionClient(std::string name, const rclcpp::NodeOptions &node_options = rclcpp::NodeOptions());
+    class ActionClient : public rclcpp::Node {
+    public:
+        using ActionMessage = tutorials_msgs::action::Fibonacci;
+        using ActionClientGoalHandle = rclcpp_action::ClientGoalHandle<ActionMessage>;
+        using ActionFeedback = std::shared_ptr<const ActionMessage::Feedback>;
+        using FeedbackCallback = std::function<void(ActionFeedback)>;
+        using ActionResult = ActionClientGoalHandle::WrappedResult;
+        using ResultCallback = std::function<void(const ActionResult &)>;
 
-    bool is_goal_done() const;
+        explicit ActionClient(const std::string &name,
+                              const rclcpp::NodeOptions &node_options = rclcpp::NodeOptions());
 
-    void set_goal(ActionMessage::Goal goal);
+        bool is_goal_done() const;
 
-    void set_processor(FeedbackProcessor processor);
+        void set_goal(ActionMessage::Goal goal);
 
-    void cancel_goal();
+        void set_feedback_callback(FeedbackCallback callback);
 
-    void send_goal();
+        void set_result_callback(ResultCallback callback);
 
-private:
-    rclcpp_action::Client<ActionMessage>::SharedPtr client_ptr_;
-    rclcpp::TimerBase::SharedPtr timer_;
-    rclcpp::TimerBase::SharedPtr timer2_;
-    ActionMessage::Goal goal_;
-    FeedbackProcessor feedback_processor_;
-    std::shared_future <std::shared_ptr<ActionGoalHandle>> goal_handle_future_;
+        void cancel_goal();
 
-    bool goal_done_;
+        void send_goal();
 
-    void goal_response_callback(std::shared_future <ActionGoalHandle::SharedPtr> future);
+    private:
+        rclcpp_action::Client<ActionMessage>::SharedPtr client_ptr_;
+        rclcpp::TimerBase::SharedPtr heartbeat_timer_;
+        rclcpp::TimerBase::SharedPtr send_timer_;
+        rclcpp::TimerBase::SharedPtr cancel_timer_;
+        ActionMessage::Goal goal_;
+        FeedbackCallback feedback_callback_;
+        ResultCallback result_callback_;
+        std::shared_future <std::shared_ptr<ActionClientGoalHandle>> goal_handle_future_;
 
-    void feedback_callback(
-            ActionGoalHandle::SharedPtr,
-            const std::shared_ptr<const ActionMessage::Feedback> feedback);
+        bool goal_done_;
 
-    void result_callback(const ActionGoalHandle::WrappedResult &result);
-};  // class MinimalActionClient
+        void goal_response_callback(std::shared_future <ActionClientGoalHandle::SharedPtr> future);
 
+        void feedback_callback(
+                ActionClientGoalHandle::SharedPtr,
+                const ActionFeedback feedback);
+
+        void result_callback(const ActionResult &result);
+    };  // class MinimalActionClient
+}  // namespace Action
 
 #endif //ACTION_NODE_ACTION_CLIENT_H

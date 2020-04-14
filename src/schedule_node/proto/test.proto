@@ -18,55 +18,53 @@ package zhihui.test.proto;
 
 import "google/protobuf/empty.proto";
 
-message Vector3d {
-    double x = 1;
-    double y = 2;
-    double z = 3;
-}
-
-message Position {
-    Vector3d pos = 1;
-}
-
-message PointCloudData {
-    repeated Vector3d point_data = 1;
-}
-
 message Metadata {
     int64 timestamp = 1;
     string client_id = 2;
-    string sensor_id = 3;
 }
 
 message LoginRequest {
     Metadata metadata = 1;
-    int64 order = 2;
-    string log_information = 3;
+    string log_information = 2;
 }
 
 message LoginResponse {
-    int64 timestamp = 1;
-    string check_information = 2;
-}
-
-message UpdatePositionRequest {
     Metadata metadata = 1;
-    Position position = 2;
+    bool is_logged = 2;
+    string check_information = 3;
 }
 
-message UploadPointCloudRequest {
+message FibonacciRequest {
     Metadata metadata = 1;
-    PointCloudData pointcloud_data = 2;
+    int64 order = 2;
 }
 
-message UpdateResponse {
-    int64 timestamp = 1;
-    int32 count = 2;
+message FibonacciSequence {
+    repeated int64 num = 1;
 }
 
-message InstructionResponse {
-    int64 timestamp = 1;
-    Position goal = 2;
+message FibonacciResponse {
+    Metadata metadata = 1;
+    bool is_done = 2;
+    oneof result {
+        int64 next_one = 3;
+        FibonacciSequence sequence = 4;
+    }
+}
+
+message SumRequest {
+    Metadata metadata = 1;
+    int64 order = 2;
+}
+
+message SumResponse {
+    Metadata metadata = 1;
+    int64 result = 2;
+}
+
+message BroadcastMessage {
+    string topic = 1;
+    string message = 2;
 }
 
 message testMessage {
@@ -75,16 +73,17 @@ message testMessage {
 }
 
 // information about the gRPC server.
-service Localization {
+service Schedule {
     // clients register at the server
     rpc Login (LoginRequest) returns (LoginResponse);
 
-    // clients wait for instructions from the server
-    rpc GetInstructions (LoginRequest) returns (stream InstructionResponse);
+    rpc Broadcast (BroadcastMessage) returns (google.protobuf.Empty);
 
-    // clients update/upload self-information to the server
-    rpc UpdatePosition (stream UpdatePositionRequest) returns (google.protobuf.Empty);
-    rpc UploadPointCloud (stream UploadPointCloudRequest) returns (google.protobuf.Empty);
+    // clients wait for fibonacci sequence from the server
+    rpc CalculateFibonacci (FibonacciRequest) returns (stream FibonacciResponse);
+
+    // server sum up all the numbers for the client
+    rpc SumNumbers (stream SumRequest) returns (SumResponse);
 
     // a test in which the client and the server exchange and increment the index
     rpc BidirectionalTest (stream testMessage) returns (stream testMessage);

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(client_node)
+project(schedule_node)
 
 # Default to C99
 if (NOT CMAKE_C_STANDARD)
@@ -51,6 +51,8 @@ foreach (message_name ${PROTO_MESSAGES})
     get_filename_component(hw_proto "./proto/${message_name}.proto" ABSOLUTE)
     get_filename_component(hw_proto_path "${hw_proto}" PATH)
     message(STATUS "Found proto ${hw_proto}")
+    message(STATUS "Found hw_proto_path ${hw_proto_path}")
+    message(STATUS "Found Protobuf_INCLUDE_DIRS ${Protobuf_INCLUDE_DIRS}")
 
     # Generated sources
     set(hw_proto_srcs "${CMAKE_CURRENT_BINARY_DIR}/${message_name}.pb.cc")
@@ -76,8 +78,10 @@ add_library(${PROJECT_NAME} SHARED
         ${hw_grpc_srcs_list}
         src/data_context_interface.cpp
         src/data_server.cpp
-        hanlders/get_instructions_handler.cpp
+        hanlders/calculate_fibonacci_handler.cpp
         hanlders/login_handler.cpp
+        hanlders/sum_numbers_handler.cpp
+        hanlders/broadcast_handler.cpp
         )
 target_compile_definitions(${PROJECT_NAME}
         PRIVATE "MINIMAL_COMPOSITION_DLL")
@@ -89,13 +93,13 @@ target_link_libraries(${PROJECT_NAME}
         )
 ament_target_dependencies(${PROJECT_NAME} rclcpp action_node service_node tutorials_msgs)
 
-add_executable(client src/main.cpp)
-target_link_libraries(client ${PROJECT_NAME})
-ament_target_dependencies(client rclcpp)
+add_executable(node src/main.cpp)
+target_link_libraries(node ${PROJECT_NAME})
+ament_target_dependencies(node rclcpp)
 
-add_executable(my_test src/my_test.cpp)
-target_link_libraries(my_test ${PROJECT_NAME})
-ament_target_dependencies(my_test rclcpp)
+add_executable(node_test src/test.cpp)
+target_link_libraries(node_test ${PROJECT_NAME})
+ament_target_dependencies(node_test rclcpp)
 
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION include/${PROJECT_NAME}
@@ -109,34 +113,21 @@ install(TARGETS
         RUNTIME DESTINATION bin
         )
 
+install(TARGETS
+        node
+        node_test
+        DESTINATION lib/${PROJECT_NAME}
+        )
+
 if (BUILD_TESTING)
     find_package(ament_lint_auto REQUIRED)
-    ament_lint_auto_find_test_dependencies()
     # the following line skips the linter which checks for copyrights
     # uncomment the line when a copyright and license is not present in all source files
     #set(ament_cmake_copyright_FOUND TRUE)
     # the following line skips cpplint (only works in a git repo)
     # uncomment the line when this package is not in a git repo
     #  set(ament_cmake_cpplint_FOUND TRUE)
-    find_package(GTest CONFIG REQUIRED)
-    find_package(ament_cmake_gtest REQUIRED)
-    find_package(rmw_implementation_cmake REQUIRED)
-
-    ament_add_gtest(${PROJECT_NAME}_test src/test.cpp)
-    target_link_libraries(${PROJECT_NAME}_test
-            ${PROJECT_NAME}
-            GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main
-            )
-    ament_target_dependencies(${PROJECT_NAME}_test rclcpp)
-
     ament_lint_auto_find_test_dependencies()
 endif ()
 
 ament_package()
-
-install(TARGETS
-        client
-        my_test
-        ${PROJECT_NAME}_test
-        DESTINATION lib/${PROJECT_NAME}
-        )

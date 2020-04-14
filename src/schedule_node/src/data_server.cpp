@@ -3,33 +3,33 @@
 //
 #include <async_grpc/completion_queue_pool.h>
 
-#include "client_node/data_context_interface.h"
-#include "client_node/data_server.h"
+#include "schedule_node/data_server.h"
+#include "schedule_node/data_context_interface.h"
 
 #include "login_handler.h"
-//#include "update_position_handler.h"
-#include "get_instructions_handler.h"
-//#include "bidirectional_test.h"
+#include "broadcast_handler.h"
+#include "sum_numbers_handler.h"
+#include "calculate_fibonacci_handler.h"
 
-using namespace server;
-using namespace message::handler;
+using namespace Schedule;
+using namespace Schedule::handler;
 
-DataServer::DataServer() {
+ScheduleServer::ScheduleServer() {
     async_grpc::Server::Builder server_builder;
     server_builder.SetServerAddress(kTestingServerAddress);
     server_builder.SetNumGrpcThreads(kNumThreads);
     server_builder.SetNumEventThreads(kNumThreads);
 
     server_builder.RegisterHandler<LoginHandler>();
-//    server_builder.RegisterHandler<UpdatePositionHandler>();
-    server_builder.RegisterHandler<GetInstructionsHandler>();
-//    server_builder.RegisterHandler<BidirectionalTest>();
+    server_builder.RegisterHandler<SumNumbersHandler>();
+    server_builder.RegisterHandler<CalculateFibonacciHandler>();
+    server_builder.RegisterHandler<BroadcastHandler>();
     grpc_server_ = server_builder.Build();
 
     grpc_server_->SetExecutionContext(std::make_unique<DataContextInterface>(this));
 }
 
-DataServer::~DataServer() {
+ScheduleServer::~ScheduleServer() {
     if (ros_thread_) {
         ros_thread_->join();
     }
@@ -38,23 +38,23 @@ DataServer::~DataServer() {
 }
 
 
-void DataServer::Start() {
+void ScheduleServer::start() {
     LOG(INFO) << "Server listening on " << kTestingServerAddress;
     grpc_server_->Start();
 }
 
-void DataServer::Shutdown() {
+void ScheduleServer::shutdown() {
     if (!is_done_) {
         is_done_ = true;
         grpc_server_->Shutdown();
     }
 }
 
-void DataServer::WaitForShutdown() {
+void ScheduleServer::wait_for_shutdown() {
     grpc_server_->WaitForShutdown();
 }
 
-void DataServer::initSlamThread() {
+void ScheduleServer::init_ros_thread() {
     using namespace std::chrono_literals;
 
     ros_thread_ = std::make_unique<std::thread>(
@@ -70,6 +70,6 @@ void DataServer::initSlamThread() {
                 }
 
                 // shutdown server
-                this->Shutdown();
+                this->shutdown();
             });
 }
