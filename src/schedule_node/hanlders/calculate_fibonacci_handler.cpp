@@ -16,7 +16,7 @@ void CalculateFibonacciHandler::OnRequest(const FibonacciIncomingType &request) 
 
     int64_t order = request.order();
     std::string client_id = request.metadata().client_id();
-    std::cout << "Get Request from: " << client_id << std::endl;
+    LOG(INFO) << "Get Request from: " << client_id;
     // verify the request here
     if (order > 0 && order < 100) {
         /// WARNING: this code block needs to return quickly to avoid blocking the handler
@@ -47,9 +47,10 @@ void CalculateFibonacciHandler::OnRequest(const FibonacciIncomingType &request) 
             response->set_next_one(num);
 
             if (writer.Write(std::move(response))) {
-                std::cout << "Write response: " << num << std::endl;
+                LOG(INFO) << "Write response: " << num;
             } else {
                 // cancel the goal when the grpc connection is broken(cos writer has been destroyed)
+                LOG(WARNING) << "grpc connection could be broken, cancel the goal";
                 client->cancel_goal();
             }
         });
@@ -62,7 +63,7 @@ void CalculateFibonacciHandler::OnRequest(const FibonacciIncomingType &request) 
             }
 
             if (writer.Write(std::move(response))) {
-                std::cout << "Write result" << std::endl;
+                LOG(INFO) << "Write result";
             }
             writer.WritesDone();
         });
@@ -70,6 +71,6 @@ void CalculateFibonacciHandler::OnRequest(const FibonacciIncomingType &request) 
         // send the goal
         client->send_goal();
     } else {
-        std::cout << "Discard invalid order: " << order << " from: " << request.metadata().client_id() << std::endl;
+        LOG(WARNING) << "discard invalid order: " << order << " from: " << request.metadata().client_id();
     }
 }

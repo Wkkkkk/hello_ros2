@@ -15,10 +15,10 @@ void BidirectionalTest::OnRequest(const proto::testMessage &request) {
     //TODO use Writer
     Send(std::move(response));
 
-    std::cout << "BidirectionalTest: " << request.index() << std::endl;
+    LOG(INFO) << "BidirectionalTest: " << request.index();
 }
 
 void BidirectionalTest::OnReadsDone() {
-    std::cout << "BidirectionalTest OnReadsDone" << std::endl;
+    LOG(INFO) << "BidirectionalTest OnReadsDone";
     Finish(::grpc::Status(::grpc::OK, "OnReadsDone"));
 }

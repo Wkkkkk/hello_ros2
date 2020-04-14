@@ -7,6 +7,10 @@ The framework should be easy to use and supports several different means of mess
 
 It receives both common and user-defined data types, which are handled by independent nodes of the system.
 
+## Build
+TODO: add docker
+TODO: add launch file
+
 ## Node dependency graph
 ![avatar](./docs/dep.png)
 
