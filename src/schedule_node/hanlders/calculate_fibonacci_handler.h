@@ -13,9 +13,11 @@
 
 #include "test.pb.h"
 #include "test.grpc.pb.h"
+#include "schedule_node/data_context_interface.h"
 
 namespace Schedule::handler {
     using namespace zhihui::test;
+    using namespace Action;
 
     using FibonacciIncomingType = zhihui::test::proto::FibonacciRequest;
     using FibonacciOutgoingType = zhihui::test::proto::FibonacciResponse;
@@ -26,10 +28,13 @@ namespace Schedule::handler {
 
     class CalculateFibonacciHandler : public async_grpc::RpcHandler<CalculateFibonacciSignature> {
     public:
+        ~CalculateFibonacciHandler();
+
         void OnRequest(const FibonacciIncomingType &request) override;
 
     private:
         int sum_ = 0;
+        std::shared_ptr <ActionClient> client_;
     };
 }
 

@@ -24,9 +24,13 @@ namespace Action {
         using FeedbackCallback = std::function<void(ActionFeedback)>;
         using ActionResult = ActionClientGoalHandle::WrappedResult;
         using ResultCallback = std::function<void(const ActionResult &)>;
+        using DefaultFunction = std::function<void()>;
 
         explicit ActionClient(const std::string &name,
+                              rclcpp::executors::MultiThreadedExecutor &executor,
                               const rclcpp::NodeOptions &node_options = rclcpp::NodeOptions());
+
+        ~ActionClient() final;
 
         bool is_goal_done() const;
 
@@ -36,7 +40,7 @@ namespace Action {
 
         void set_result_callback(ResultCallback callback);
 
-        void cancel_goal();
+        void cancel_goal(DefaultFunction callback = nullptr);
 
         void send_goal();
 
@@ -45,6 +49,8 @@ namespace Action {
         rclcpp::TimerBase::SharedPtr heartbeat_timer_;
         rclcpp::TimerBase::SharedPtr send_timer_;
         rclcpp::TimerBase::SharedPtr cancel_timer_;
+        rclcpp::executors::MultiThreadedExecutor &executor_;
+
         ActionMessage::Goal goal_;
         FeedbackCallback feedback_callback_;
         ResultCallback result_callback_;

@@ -12,8 +12,10 @@ using namespace Action;
 // the time out timer use to make async_cancel_goal() and avoid deadlock scenario
 auto C_DELAY_TIME = 10ms;
 
-ActionClient::ActionClient(const std::string &name, const rclcpp::NodeOptions &node_options)
-        : Node(name, node_options), goal_done_(true) {
+ActionClient::ActionClient(const std::string &name,
+                           rclcpp::executors::MultiThreadedExecutor &executor,
+                           const rclcpp::NodeOptions &node_options)
+        : Node(name, node_options), executor_(executor), goal_done_(true) {
     this->client_ptr_ = rclcpp_action::create_client<ActionMessage>(
             this->get_node_base_interface(),
             this->get_node_graph_interface(),
@@ -30,11 +32,15 @@ ActionClient::ActionClient(const std::string &name, const rclcpp::NodeOptions &n
     });
 }
 
+ActionClient::~ActionClient() {
+    RCLCPP_INFO(this->get_logger(), "node %s is released", this->get_name());
+}
+
 bool ActionClient::is_goal_done() const {
     return this->goal_done_;
 }
 
-void ActionClient::cancel_goal() {
+void ActionClient::cancel_goal(DefaultFunction callback) {
     RCLCPP_INFO(this->get_logger(), "cancel goal");
     // in case server not available or goal hasn't been sent
     if (goal_handle_future_.valid()) {
@@ -42,11 +48,13 @@ void ActionClient::cancel_goal() {
         /// but async_cancel_goal() and feedback_callback() both requires goal_handles_mutex_
         /// which could result in a dead lock
         /// so we made async_cancel_goal() run through a timer to avoid such scenario
-        cancel_timer_ = this->create_wall_timer(C_DELAY_TIME, [this]() {
+        cancel_timer_ = this->create_wall_timer(C_DELAY_TIME, [this, callback]() {
             cancel_timer_->cancel();
 
-            auto handle = goal_handle_future_.get();
             auto cancel_result_future = this->client_ptr_->async_cancel_goal(goal_handle_future_.get());
+            if (callback) {
+                callback();
+            }
         });
     }
 }
@@ -92,13 +100,6 @@ void ActionClient::send_goal() {
             std::bind(&ActionClient::result_callback, this, _1);
 
     auto goal_handle_future = this->client_ptr_->async_send_goal(goal_msg, send_goal_options);
-
-    /*
-     * TODO: test if it's necessary to put off async_send_goal()
-    send_timer_ = this->create_wall_timer(C_DELAY_TIME, [this]() {
-        send_timer_->cancel();
-    });
-    */
 }
 
 void ActionClient::goal_response_callback(std::shared_future <ActionClientGoalHandle::SharedPtr> future) {

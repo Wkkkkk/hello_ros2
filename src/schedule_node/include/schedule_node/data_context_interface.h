@@ -31,13 +31,11 @@ namespace Schedule {
 
         std::shared_ptr <ActionClient> find_or_create_action_client(const std::string &node_name);
 
-    private:
-        // add node to executor
-        void add_node(std::shared_ptr <rclcpp::Node> node_ptr);
-
-        // remove client from all_action_clients_
         void remove_action_node_by_name(const std::string &node_name);
 
+        void remove_action_node(std::shared_ptr <ActionClient> node);
+
+    private:
         ScheduleServer *map_builder_server_;
 
         std::mutex mutex_; // protect all_action_clients

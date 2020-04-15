@@ -77,7 +77,7 @@ void publisher_test() {
 }
 
 int main(int, char **) {
-    publisher_test();
+    action_test();
 
     return 0;
 }
