@@ -13,9 +13,8 @@ using namespace Action;
 auto C_DELAY_TIME = 10ms;
 
 ActionClient::ActionClient(const std::string &name,
-                           rclcpp::executors::MultiThreadedExecutor &executor,
                            const rclcpp::NodeOptions &node_options)
-        : Node(name, node_options), executor_(executor), goal_done_(true) {
+        : Node(name, node_options), goal_done_(true) {
     this->client_ptr_ = rclcpp_action::create_client<ActionMessage>(
             this->get_node_base_interface(),
             this->get_node_graph_interface(),
@@ -40,23 +39,16 @@ bool ActionClient::is_goal_done() const {
     return this->goal_done_;
 }
 
-void ActionClient::cancel_goal(DefaultFunction callback) {
+std::optional <ActionClient::CancelResponseSharedFuture> ActionClient::cancel_goal() {
     RCLCPP_INFO(this->get_logger(), "cancel goal");
     // in case server not available or goal hasn't been sent
     if (goal_handle_future_.valid()) {
-        /// this function could be called in feedback_callback()
-        /// but async_cancel_goal() and feedback_callback() both requires goal_handles_mutex_
-        /// which could result in a dead lock
-        /// so we made async_cancel_goal() run through a timer to avoid such scenario
-        cancel_timer_ = this->create_wall_timer(C_DELAY_TIME, [this, callback]() {
-            cancel_timer_->cancel();
+        auto cancel_result_future = this->client_ptr_->async_cancel_goal(goal_handle_future_.get());
 
-            auto cancel_result_future = this->client_ptr_->async_cancel_goal(goal_handle_future_.get());
-            if (callback) {
-                callback();
-            }
-        });
+        return {cancel_result_future};
     }
+
+    return {};
 }
 
 void ActionClient::set_goal(ActionMessage::Goal goal) {

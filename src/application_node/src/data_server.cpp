@@ -3,8 +3,8 @@
 //
 #include <async_grpc/completion_queue_pool.h>
 
-#include "schedule_node/data_server.h"
-#include "schedule_node/data_context_interface.h"
+#include "application_node/data_server.h"
+#include "application_node/data_context_interface.h"
 
 #include "login_handler.h"
 #include "broadcast_handler.h"

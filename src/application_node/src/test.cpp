@@ -7,7 +7,7 @@
 #include <grpc++/grpc++.h>
 #include <glog/logging.h>
 
-#include "schedule_node/data_context_interface.h"
+#include "application_node/data_context_interface.h"
 #include "calculate_fibonacci_handler.h"
 #include "sum_numbers_handler.h"
 #include "broadcast_handler.h"

@@ -13,7 +13,7 @@
 
 #include "test.pb.h"
 #include "test.grpc.pb.h"
-#include "schedule_node/data_context_interface.h"
+#include "application_node/data_context_interface.h"
 
 namespace Schedule::handler {
     using namespace zhihui::test;
@@ -33,7 +33,6 @@ namespace Schedule::handler {
         void OnRequest(const FibonacciIncomingType &request) override;
 
     private:
-        int sum_ = 0;
         std::shared_ptr <ActionClient> client_;
     };
 }

@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
     options.use_intra_process_comms(true);
 
     auto action_server = std::make_shared<ActionNode>(options);
-    auto action_client = std::make_shared<ActionClient>("ActionClient1", exec, options);
+    auto action_client = std::make_shared<ActionClient>("ActionClient1", options);
     exec.add_node(action_server);
     exec.add_node(action_client);
 

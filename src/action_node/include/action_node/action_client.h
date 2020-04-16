@@ -24,10 +24,10 @@ namespace Action {
         using FeedbackCallback = std::function<void(ActionFeedback)>;
         using ActionResult = ActionClientGoalHandle::WrappedResult;
         using ResultCallback = std::function<void(const ActionResult &)>;
-        using DefaultFunction = std::function<void()>;
+        using CancelResponseSharedFuture =
+        std::shared_future<rclcpp_action::Client<ActionMessage>::CancelResponse::SharedPtr>;
 
-        explicit ActionClient(const std::string &name,
-                              rclcpp::executors::MultiThreadedExecutor &executor,
+        explicit ActionClient(const std::string &name = "",
                               const rclcpp::NodeOptions &node_options = rclcpp::NodeOptions());
 
         ~ActionClient() final;
@@ -40,16 +40,19 @@ namespace Action {
 
         void set_result_callback(ResultCallback callback);
 
-        void cancel_goal(DefaultFunction callback = nullptr);
-
         void send_goal();
+
+        /**
+         * this function shouldn't be called in feedback_callback()
+         * because async_cancel_goal() and feedback_callback() both requires goal_handles_mutex_
+         * which results in a dead lock
+         * if necessary, we can make async_cancel_goal() run through a timer to avoid such scenario
+         * */
+        std::optional <CancelResponseSharedFuture> cancel_goal();
 
     private:
         rclcpp_action::Client<ActionMessage>::SharedPtr client_ptr_;
         rclcpp::TimerBase::SharedPtr heartbeat_timer_;
-        rclcpp::TimerBase::SharedPtr send_timer_;
-        rclcpp::TimerBase::SharedPtr cancel_timer_;
-        rclcpp::executors::MultiThreadedExecutor &executor_;
 
         ActionMessage::Goal goal_;
         FeedbackCallback feedback_callback_;

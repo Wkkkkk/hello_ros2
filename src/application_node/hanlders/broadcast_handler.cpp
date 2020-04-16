@@ -5,7 +5,7 @@
 #include <std_msgs/msg/string.hpp>
 
 #include "broadcast_handler.h"
-#include "schedule_node/data_context_interface.h"
+#include "application_node/data_context_interface.h"
 
 using namespace Schedule;
 using namespace Schedule::handler;

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(schedule_node)
+project(application_node)
 
 # Default to C99
 if (NOT CMAKE_C_STANDARD)
@@ -27,6 +27,8 @@ find_package(action_node REQUIRED)
 set(protobuf_MODULE_COMPATIBLE TRUE)
 find_package(Protobuf CONFIG REQUIRED)
 set(_PROTOBUF_PROTOC $<TARGET_FILE:protobuf::protoc>)
+#set(Protobuf_INCLUDE_DIRS /home/zhihui/workspace/library/vcpkg/installed/x64-linux/include/google/protobuf)
+
 ## find grpc
 find_package(gRPC CONFIG REQUIRED)
 set(_GRPC_CPP_PLUGIN_EXECUTABLE $<TARGET_FILE:gRPC::grpc_cpp_plugin>)

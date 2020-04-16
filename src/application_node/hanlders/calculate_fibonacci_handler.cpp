@@ -8,8 +8,10 @@ using namespace Schedule;
 using namespace Schedule::handler;
 
 CalculateFibonacciHandler::~CalculateFibonacciHandler() {
-    GetUnsynchronizedContext<DataContextInterface>()->remove_action_node(client_);
     LOG(INFO) << "connection is broken";
+    // when the connection is broken, this handler will destruct
+    // stop the action client from working, and release it
+    GetUnsynchronizedContext<DataContextInterface>()->remove_action_node(client_);
 }
 
 void CalculateFibonacciHandler::OnRequest(const FibonacciIncomingType &request) {
@@ -28,14 +30,14 @@ void CalculateFibonacciHandler::OnRequest(const FibonacciIncomingType &request) 
         // client's name is request.client_id
         auto client = GetUnsynchronizedContext<DataContextInterface>()
                 ->find_or_create_action_client(request.metadata().client_id());
-        client_ = client;
-        std::weak_ptr <ActionClient> client_weak_ptr(client);
 
-        // if we have sent a goal before, cancel the current one
-        // if we haven't sent a goal, calling cancel_goal() won't have impacts
+        // hold this shared_ptr in handler
+        client_ = client;
+
+        // if this client has sent a goal twice and the former goal is running, cancel the former one
         if (!client->is_goal_done()) {
+            LOG(WARNING) << "goal has yet finished, cancel the former one";
             client->cancel_goal();
-            LOG(WARNING) << "goal has yet been done, cancel it";
         }
 
         // get the writer through which we can send back responses to clients
@@ -46,6 +48,12 @@ void CalculateFibonacciHandler::OnRequest(const FibonacciIncomingType &request) 
         goal.order = request.order();
         client->set_goal(goal);
 
+        // set feedback callback
+        /// If you capture a shared pointer with a lambda, that lambda will contain a shared pointer.
+        /// This is a typical scenario where the object owns a reference to itself, and thus can never be deleted.
+        /// To fix this, first establish a rule: never capture a std::shared_ptr<> in a lambda.
+        /// A simple solution is to use std::weak_ptr<>.
+        std::weak_ptr <ActionClient> client_weak_ptr(client);
         client->set_feedback_callback([client_weak_ptr, writer](ActionClient::ActionFeedback feedback) {
             if (auto client = client_weak_ptr.lock()) {
                 int num = feedback->partial_sequence.back();
@@ -58,15 +66,11 @@ void CalculateFibonacciHandler::OnRequest(const FibonacciIncomingType &request) 
 
                 if (writer.Write(std::move(response))) {
                     LOG(INFO) << "Write response: " << num;
-                } else {
-                    // cancel the goal when the grpc connection is broken(cos writer has been destroyed)
-                    client->cancel_goal();
-
-                    LOG(WARNING) << "grpc connection is broken, cancel the goal";
                 }
             }
         });
 
+        // set result callback
         client->set_result_callback([client_weak_ptr, writer](const ActionClient::ActionResult &result) {
             if (auto client = client_weak_ptr.lock()) {
                 std::string node_id = client->get_name();
@@ -81,8 +85,6 @@ void CalculateFibonacciHandler::OnRequest(const FibonacciIncomingType &request) 
                 if (writer.Write(std::move(response))) {
                     writer.WritesDone();
                     LOG(INFO) << "send back result";
-                } else {
-                    LOG(WARNING) << "grpc connection is broken, drop the result";
                 }
             }
         });
