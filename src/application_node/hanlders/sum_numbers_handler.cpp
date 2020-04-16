@@ -16,7 +16,7 @@ void SumNumbersHandler::OnRequest(const SumIncomingType &request) {
 
     int64_t order = request.order();
     std::string client_id = request.metadata().client_id();
-    LOG(INFO) << "Get Request from: " << client_id;
+    LOG(INFO) << "Get Request from: " << client_id << " order: " << order;
 
     // TODO: add bounding test
     client_id_ = client_id;

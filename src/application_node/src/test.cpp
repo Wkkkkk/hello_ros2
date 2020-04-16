@@ -1,6 +1,3 @@
-//
-// Created by zhihui on 4/11/20.
-//
 
 #include <async_grpc/client.h>
 #include <async_grpc/execution_context.h>

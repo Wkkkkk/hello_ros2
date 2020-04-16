@@ -9,8 +9,8 @@ using namespace Schedule::handler;
 
 CalculateFibonacciHandler::~CalculateFibonacciHandler() {
     LOG(INFO) << "connection is broken";
-    // when the connection is broken, this handler will destruct
-    // stop the action client from working, and release it
+    // when the connection is broken, this handler will be destroyed
+    // we should stop the action client from working, and release it
     GetUnsynchronizedContext<DataContextInterface>()->remove_action_node(client_);
 }
 

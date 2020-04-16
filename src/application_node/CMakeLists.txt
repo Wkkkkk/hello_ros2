@@ -27,7 +27,10 @@ find_package(action_node REQUIRED)
 set(protobuf_MODULE_COMPATIBLE TRUE)
 find_package(Protobuf CONFIG REQUIRED)
 set(_PROTOBUF_PROTOC $<TARGET_FILE:protobuf::protoc>)
-#set(Protobuf_INCLUDE_DIRS /home/zhihui/workspace/library/vcpkg/installed/x64-linux/include/google/protobuf)
+if (${Protobuf_INCLUDE_DIRS} STREQUAL "")
+    message(ERROR "Can't find Protobuf_INCLUDE_DIRS,
+        it should be ${VCPKG_DIR}/installed/x64-linux/include/google/protobuf")
+endif ()
 
 ## find grpc
 find_package(gRPC CONFIG REQUIRED)
@@ -42,7 +45,7 @@ include_directories(
         hanlders
         ${CMAKE_CURRENT_BINARY_DIR} # for generated protobuf messages
 )
-message(STATUS "Message at: ${CMAKE_CURRENT_BINARY_DIR}")
+message(STATUS "Messages are built at: ${CMAKE_CURRENT_BINARY_DIR}")
 
 # generate all messages
 set(PROTO_MESSAGES test)
@@ -53,8 +56,6 @@ foreach (message_name ${PROTO_MESSAGES})
     get_filename_component(hw_proto "./proto/${message_name}.proto" ABSOLUTE)
     get_filename_component(hw_proto_path "${hw_proto}" PATH)
     message(STATUS "Found proto ${hw_proto}")
-    message(STATUS "Found hw_proto_path ${hw_proto_path}")
-    message(STATUS "Found Protobuf_INCLUDE_DIRS ${Protobuf_INCLUDE_DIRS}")
 
     # Generated sources
     set(hw_proto_srcs "${CMAKE_CURRENT_BINARY_DIR}/${message_name}.pb.cc")
@@ -119,6 +120,11 @@ install(TARGETS
         node
         node_test
         DESTINATION lib/${PROJECT_NAME}
+        )
+
+install(DIRECTORY
+        launch
+        DESTINATION share/${PROJECT_NAME}/
         )
 
 if (BUILD_TESTING)
