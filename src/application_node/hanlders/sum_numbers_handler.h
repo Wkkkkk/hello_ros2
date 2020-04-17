@@ -14,7 +14,7 @@
 #include "test.pb.h"
 #include "test.grpc.pb.h"
 
-namespace Schedule::handler {
+namespace Application::handler {
     using namespace zhihui::test;
 
     using SumIncomingType = zhihui::test::proto::SumRequest;
@@ -22,7 +22,7 @@ namespace Schedule::handler {
 
     DEFINE_HANDLER_SIGNATURE(
             SumNumbersSignature, async_grpc::Stream<SumIncomingType>, SumOutgoingType,
-    "/zhihui.test.proto.Schedule/SumNumbers")
+    "/zhihui.test.proto.Application/SumNumbers")
 
     class SumNumbersHandler : public async_grpc::RpcHandler<SumNumbersSignature> {
     public:

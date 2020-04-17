@@ -11,8 +11,8 @@
 #include "sum_numbers_handler.h"
 #include "calculate_fibonacci_handler.h"
 
-using namespace Schedule;
-using namespace Schedule::handler;
+using namespace Application;
+using namespace Application::handler;
 
 ScheduleServer::ScheduleServer() {
     async_grpc::Server::Builder server_builder;

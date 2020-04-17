@@ -73,7 +73,7 @@ message testMessage {
 }
 
 // information about the gRPC server.
-service Schedule {
+service Application {
     // clients register at the server
     rpc Login (LoginRequest) returns (LoginResponse);
 

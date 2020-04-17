@@ -15,14 +15,14 @@
 #include "test.pb.h"
 #include "test.grpc.pb.h"
 
-namespace Schedule::handler {
+namespace Application::handler {
     using namespace zhihui::test;
 
     using BroadcastIncomingType = zhihui::test::proto::BroadcastMessage;
     using BroadcastOutgoingType = google::protobuf::Empty;
 
     DEFINE_HANDLER_SIGNATURE(BroadcastSignature, BroadcastIncomingType, BroadcastOutgoingType,
-    "/zhihui.test.proto.Schedule/Broadcast")
+    "/zhihui.test.proto.Application/Broadcast")
 
     class BroadcastHandler : public async_grpc::RpcHandler<BroadcastSignature> {
     public:

@@ -4,7 +4,7 @@
 
 #include "application_node/data_server.h"
 
-using namespace Schedule;
+using namespace Application;
 
 int main(int argc, char **argv) {
     rclcpp::init(argc, argv);

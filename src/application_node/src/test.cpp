@@ -9,8 +9,8 @@
 #include "sum_numbers_handler.h"
 #include "broadcast_handler.h"
 
-using namespace Schedule;
-using namespace Schedule::handler;
+using namespace Application;
+using namespace Application::handler;
 using namespace async_grpc;
 
 void action_test() {

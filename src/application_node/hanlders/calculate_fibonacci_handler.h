@@ -15,7 +15,7 @@
 #include "test.grpc.pb.h"
 #include "application_node/data_context_interface.h"
 
-namespace Schedule::handler {
+namespace Application::handler {
     using namespace zhihui::test;
     using namespace Action;
 
@@ -24,7 +24,7 @@ namespace Schedule::handler {
 
     DEFINE_HANDLER_SIGNATURE(CalculateFibonacciSignature, FibonacciIncomingType,
             async_grpc::Stream<FibonacciOutgoingType>,
-    "/zhihui.test.proto.Schedule/CalculateFibonacci")
+    "/zhihui.test.proto.Application/CalculateFibonacci")
 
     class CalculateFibonacciHandler : public async_grpc::RpcHandler<CalculateFibonacciSignature> {
     public:

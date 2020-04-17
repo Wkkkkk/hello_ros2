@@ -5,7 +5,7 @@
 #include "application_node/data_server.h"
 #include "application_node/data_context_interface.h"
 
-using namespace Schedule;
+using namespace Application;
 using namespace std::chrono_literals;
 
 DataContextInterface::DataContextInterface(ScheduleServer *map_builder_server)
@@ -17,11 +17,7 @@ void DataContextInterface::remove_action_node(std::shared_ptr <ActionClient> cli
     // unregister the client
     {
         std::lock_guard lock(mutex_);
-        auto iter = all_action_clients_.find(client_id);
-
-        if (iter != all_action_clients_.end()) {
-            all_action_clients_.erase(client_id);
-        }
+        all_action_clients_.erase(client_id);
     }
 
     auto &executor = map_builder_server_->get_executor();

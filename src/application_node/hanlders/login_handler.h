@@ -14,14 +14,14 @@
 #include "test.pb.h"
 #include "test.grpc.pb.h"
 
-namespace Schedule::handler {
+namespace Application::handler {
     using namespace zhihui::test;
 
     using LoginIncomingType = zhihui::test::proto::LoginRequest;
     using LoginOutgoingType = zhihui::test::proto::LoginResponse;
 
     DEFINE_HANDLER_SIGNATURE(LoginSignature, LoginIncomingType, LoginOutgoingType,
-    "/zhihui.test.proto.Schedule/Login")
+    "/zhihui.test.proto.Application/Login")
 
     class LoginHandler : public async_grpc::RpcHandler<LoginSignature> {
     public:

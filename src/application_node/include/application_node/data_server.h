@@ -11,7 +11,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <async_grpc/server.h>
 
-namespace Schedule {
+namespace Application {
     class ScheduleServer {
     public:
         ScheduleServer();

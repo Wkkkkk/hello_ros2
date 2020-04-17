@@ -17,7 +17,7 @@
 #include "action_node/action_client.h"
 #include "service_node/service_client.h"
 
-namespace Schedule {
+namespace Application {
     using namespace Action;
 
     const std::string kTestingServerAddress = "localhost:50051";

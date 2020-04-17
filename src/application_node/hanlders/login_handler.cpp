@@ -5,8 +5,8 @@
 #include "login_handler.h"
 #include "application_node/data_context_interface.h"
 
-using namespace Schedule;
-using namespace Schedule::handler;
+using namespace Application;
+using namespace Application::handler;
 
 void LoginHandler::OnRequest(const LoginIncomingType &request) {
     std::string client_id = request.metadata().client_id();

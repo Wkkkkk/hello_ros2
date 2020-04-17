@@ -4,8 +4,8 @@
 
 #include "calculate_fibonacci_handler.h"
 
-using namespace Schedule;
-using namespace Schedule::handler;
+using namespace Application;
+using namespace Application::handler;
 
 CalculateFibonacciHandler::~CalculateFibonacciHandler() {
     LOG(INFO) << "connection is broken";
