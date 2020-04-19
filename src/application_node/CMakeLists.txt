@@ -28,8 +28,9 @@ set(protobuf_MODULE_COMPATIBLE TRUE)
 find_package(Protobuf CONFIG REQUIRED)
 set(_PROTOBUF_PROTOC $<TARGET_FILE:protobuf::protoc>)
 if (${Protobuf_INCLUDE_DIRS} STREQUAL "")
-    message(ERROR "Can't find Protobuf_INCLUDE_DIRS,
-        it should be ${VCPKG_DIR}/installed/x64-linux/include/google/protobuf")
+    message(WARNING "Can't find Protobuf_INCLUDE_DIRS,
+        it should be $ENV{VCPKG_DIR}/installed/x64-linux/include")
+    set(Protobuf_INCLUDE_DIRS $ENV{VCPKG_DIR}/installed/x64-linux/include)
 endif ()
 
 ## find grpc

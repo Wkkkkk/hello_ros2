@@ -18,7 +18,7 @@ endif ()
 find_package(ament_cmake REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
-find_package(roscpp REQUIRED)
+find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
 
 find_package(yaml-cpp REQUIRED)
