@@ -45,6 +45,9 @@ RUN cd /tmp \
 
 ## build target project
 RUN cd /tmp \
-    && git clone https://gitee.com/Will_1989/hello_ros2.git \
-    && cd hello_ros2 && colcon build
+    && git clone https://gitee.com/Will_1989/hello_ros2.git
 
+COPY build.sh /tmp/hello_ros2
+RUN cd /tmp/hello_ros2 && ./build.sh
+
+EXPOSE 50051
