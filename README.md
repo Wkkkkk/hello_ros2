@@ -22,3 +22,11 @@ See [README](/src/pubsub_node/README.md) page for details.
 * Action
 
 See [README](/src/action_node/README.md) page for details.
+
+* Application
+
+See [README](/src/application_node/README.md) page for details.
+
+## How to build
+
+See docs/Dockerfile for reference

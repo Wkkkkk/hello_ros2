@@ -49,5 +49,3 @@ RUN cd /tmp \
 
 COPY build.sh /tmp/hello_ros2
 RUN cd /tmp/hello_ros2 && ./build.sh
-
-EXPOSE 50051

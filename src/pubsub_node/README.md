@@ -48,3 +48,17 @@ For sensor data, in most cases it’s more important to receive readings in a ti
 Parameters are based on services, and as such have a similar profile. The difference is that parameters use a much larger queue depth so that requests do not get lost when, for example, the parameter client is unable to reach the parameter service server.
 
 Profiles allow developers to focus on their applications without worrying about every QoS setting in the DDS specification
+
+## How to mock an unstable wireless network environment
+
+```
+# run pub-sub in one tmd
+ros2 run pubsub_node composed_node
+
+# in another tmd
+# ask eth0 to drop n% messages and see what happends
+sudo tc qdisc add dev eth0 root netem loss 50%
+
+# don't forget to cancel it when the test is done :)
+sudo tc qdisc del dev eth0 root netem loss 50%
+```
