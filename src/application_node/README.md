@@ -8,7 +8,7 @@ The framework is simple to use and supports arbitrary RPC types, i.e. all combin
 gRPC is Google's open source RPC system which relies on Protobuf as a message serialization format.
 
 gRPC makes it convenient through its protobuf compiler plugin to implement synchronous servers. 
-For Robotics, sensor data (IMU, odometry, fixed-frame poses) and intermediate local SLAM results need to be continuously streamed to the cloud Cartographer instance. 
+For Robotics, sensor data (IMU, odometry, fixed-frame poses) and intermediate local SLAM results need to be continuously streamed to the cloud Server instance. 
 Strict time ordering is only required for sensor data of the same type. 
 
 So we built a small server framework on top of the existing gRPC async mechanisms to make it convenient to write asynchronous gRPC servers.

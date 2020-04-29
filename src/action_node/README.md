@@ -5,6 +5,8 @@ There are **three forms of communication** in ROS: topics, services, and actions
 
 Topic publishers broadcast to multiple subscribers, but communication is one-way. 
 
+There are two entities involved in services and actions: an action server and an action client.
+
 Service clients send a request to a service server and get a response, but there is no information about the progress. 
 
 Similar to services, action clients send a request to an action server in order to achieve some goal and will get a result. 
@@ -12,11 +14,9 @@ Unlike services, while the action is being peformed an action server sends progr
 
 Actions are useful when a response may take a significant length of time. 
 They allow a client to track the progress of a request, get the final outcome, and optionally cancel the request before it completes.
-ROS 1 uses TCP as the underlying transport, which is unsuitable for lossy networks such as wireless links. 
-With ROS 2 relying on DDS which uses UDP as its transport, we can give control over the level of reliability a node can expect and act accordingly.
 
-There are two entities involved in actions: an action server and an action client.
 **Under the hood, an action is made up of three services and two topics.**
+
 ## Action Interface Definition
 Actions are specified using a form of the ROS Message IDL. The specification contains three sections, each of which is a message specification:
 
