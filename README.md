@@ -2,15 +2,11 @@
 
 ## Objective
 
-This repository aims to integrate grpc and ROS2 framework which supports action/service/topic-based communication between nodes.
-The framework should be easy to use and supports several different means of message transmission.
+This repository aims to integrate async-gRPC and ROS2 framework to support action/service/topic-based communication.
 
-It receives both common and user-defined data types, which are handled by independent nodes of the system.
+The framework should be easy to use and support both common and user-defined data types.
 
-## Build
-TODO: add docker
-
-TODO: add launch file
+It's worth noting that all tasks are handled by independent nodes of the system.
 
 ## Node dependency graph
 ![avatar](./docs/dep.png)
@@ -18,5 +14,11 @@ TODO: add launch file
 ## Architecture
 ![avatar](./docs/architecture.png)
 
-## gRPC
-![avatar](./docs/grpc.png)
+## Submodule
+* Pub/Sub
+
+See [README](/src/pubsub_node/README.md) page for details.
+
+* Action
+
+See [README](/src/action_node/README.md) page for details.

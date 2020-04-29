@@ -23,7 +23,7 @@ ActionClient::ActionClient(const std::string &name,
             "fibonacci");
 
     // default value
-    goal_.order = 0;
+    goal_.order = 5;
 
     // heartbeat test
     heartbeat_timer_ = this->create_wall_timer(1s, [this]() {
